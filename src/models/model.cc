@@ -32,6 +32,9 @@ namespace ctranslate2 {
     template<>
     std::string consume(std::istream& in) {
       const auto str_length = consume<uint16_t>(in);
+      // TODO:stran debug
+      // std::cout << "str_length: ";
+      // std::cout << str_length << std::endl;
       const auto c_str = consume<char>(in, str_length);
       std::string str(c_str);
       delete [] c_str;
@@ -494,15 +497,26 @@ namespace ctranslate2 {
       // See the model serialization in python/ctranslate2/specs/model_spec.py.
       const auto binary_version = consume<uint32_t>(model_file);
       check_version(binary_version, current_binary_version, "binary version");
+      // TODO:stran debug
+      std::cout << "binary_version: ";
+      std::cout << binary_version << std::endl;
 
       std::string spec;
       size_t spec_revision;
       if (binary_version >= 2) {
+        // TODO:stran debug
+        std::cout << "read spec_revision" << std::endl;
         spec = consume<std::string>(model_file);
+        std::cout << "spec: ";
+        std::cout << spec << std::endl;
         spec_revision = consume<uint32_t>(model_file);
       } else {
         spec_revision = 1;
       }
+      // TODO:stran debug
+      // std::cout << (binary_version >= 2) << std::endl;
+      std::cout << "spec_revision: ";
+      std::cout << spec_revision << std::endl;
 
       Model* model = create_model(model_reader, spec, spec_revision);
       model->set_device(device, device_index);
@@ -511,18 +525,41 @@ namespace ctranslate2 {
       check_version(spec_revision, model->current_spec_revision(), "revision");
 
       const auto num_variables = consume<uint32_t>(model_file);
+      // TODO:stran debug
+      // std::cout << (binary_version >= 2) << std::endl;
+      std::cout << "num_variables: ";
+      std::cout << num_variables << std::endl;
+ 
       model->_variable_index.reserve(num_variables);
+      // TODO: ちょっと4個だけ見る
+      // for (uint32_t i = 0; i < 4; ++i) {
       for (uint32_t i = 0; i < num_variables; ++i) {
         const auto name = consume<std::string>(model_file);
+        std::cout << "name: ";
+        std::cout << name << std::endl;
         const size_t rank = consume<uint8_t>(model_file);
+        std::cout << "rank: ";
+        std::cout << rank << std::endl;
         const auto* dimensions = consume<uint32_t>(model_file, rank);
+        std::cout << "dimensions: ";
+        std::cout << dimensions << std::endl;
+        for(size_t i = 0; i < rank; i++) {
+          const auto dim = dimensions[i];
+          std::cout << dim << std::endl;
+        }
 
         DataType dtype;
         dim_t num_bytes = 0;
         if (binary_version >= 4) {
           const auto type_id = consume<uint8_t>(model_file);
+          std::cout << "type_id: ";
+          std::cout << type_id << std::endl;
           dtype = static_cast<DataType>(type_id);
+          // std::cout << "dtype: ";
+          // std::cout << dtype << std::endl;
           num_bytes = consume<uint32_t>(model_file);
+          std::cout << "num_bytes: ";
+          std::cout << num_bytes << std::endl;
         } else {
           const auto item_size = consume<uint8_t>(model_file);
           dtype = get_dtype_from_item_size(item_size);

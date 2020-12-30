@@ -94,11 +94,17 @@ int main(int argc, char* argv[]) {
     break;
   };
 
+  // TODO:stran debug
+  std::cout << "start model load()" << std::endl;
+
   auto model = ctranslate2::models::Model::load(
     args["model"].as<std::string>(),
     device,
     args["device_index"].as<int>(),
     compute_type);
+
+  // TODO:stran debug
+  std::cout << "end model load()" << std::endl;
 
   ctranslate2::TranslatorPool translator_pool(inter_threads, intra_threads, model);
 
